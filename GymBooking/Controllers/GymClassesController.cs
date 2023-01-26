@@ -29,8 +29,10 @@ namespace GymBooking.Controllers
         // GET: GymClasses
         public async Task<IActionResult> Index()
         {
-              return _context.GymClasses != null ? 
-                          View(await _context.GymClasses.ToListAsync()) :
+              return _context.GymClasses != null ?
+                //Visa alla gympass = använd IgnoreQueryFilters enl nedan.          
+                View(await _context.GymClasses.IgnoreQueryFilters().ToListAsync()) :
+                          //View(await _context.GymClasses.ToListAsync()):
                           Problem("Entity set 'ApplicationDbContext.GymClasses'  is null.");
         }
 
