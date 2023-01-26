@@ -7,17 +7,24 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using GymBooking.Data;
 using GymBooking.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNet.Identity;
 
 namespace GymBooking.Controllers
 {
     public class GymClassesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> userManager;
 
-        public GymClassesController(ApplicationDbContext context)
+        public GymClassesController(ApplicationDbContext context, Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            this.userManager = userManager;
         }
+
+        
 
         // GET: GymClasses
         public async Task<IActionResult> Index()
@@ -26,6 +33,47 @@ namespace GymBooking.Controllers
                           View(await _context.GymClasses.ToListAsync()) :
                           Problem("Entity set 'ApplicationDbContext.GymClasses'  is null.");
         }
+
+        [Authorize]
+        public async Task<IActionResult> BookingToggle(int? id)
+        {
+            if (id is null) return BadRequest();
+
+            // var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = userManager.GetUserId(User);
+
+            if (userId == null) return NotFound();
+
+            //var currentGymClass = await _context.GymClasses.Include(g => g.AttendingMembers)
+            //                                               .FirstOrDefaultAsync(g => g.Id == id);
+
+            //var attending = currentGymClass?.AttendingMembers.FirstOrDefault(a => a.ApplicationUserId == userId);
+
+            var attending = await _context.AppUserGymClass.FindAsync(userId, id);
+
+            if (attending == null)
+            {
+                var booking = new ApplicationUserGymClass
+                {
+                    ApplicationUserId = userId,
+                    GymClassId = (int)id
+                };
+
+                _context.AppUserGymClass.Add(booking);
+            }
+            else
+            {
+                _context.AppUserGymClass.Remove(attending);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index");
+
+        }
+
+
+
 
         // GET: GymClasses/Details/5
         public async Task<IActionResult> Details(int? id)
