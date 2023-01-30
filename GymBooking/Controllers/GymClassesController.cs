@@ -86,6 +86,8 @@ namespace GymBooking.Controllers
             }
 
             var gymClass = await _context.GymClasses
+                .Include(m => m.AttendingMembers)
+                .ThenInclude(ug => ug.ApplicationUser)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (gymClass == null)
             {
