@@ -35,7 +35,6 @@ namespace GymBooking.Controllers
                           //View(await _context.GymClasses.ToListAsync()):
                           Problem("Entity set 'ApplicationDbContext.GymClasses'  is null.");
         }
-
         [Authorize]
         public async Task<IActionResult> BookingToggle(int? id)
         {
@@ -78,6 +77,7 @@ namespace GymBooking.Controllers
 
 
         // GET: GymClasses/Details/5
+        [Authorize]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.GymClasses == null)
@@ -86,8 +86,8 @@ namespace GymBooking.Controllers
             }
 
             var gymClass = await _context.GymClasses
-                .Include(m => m.AttendingMembers)
-                .ThenInclude(ug => ug.ApplicationUser)
+                .Include(am => am.AttendingMembers)
+                .ThenInclude(au => au.ApplicationUser)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (gymClass == null)
             {
@@ -98,6 +98,7 @@ namespace GymBooking.Controllers
         }
 
         // GET: GymClasses/Create
+        [Authorize]
         public IActionResult Create()
         {
             return View();
@@ -120,6 +121,7 @@ namespace GymBooking.Controllers
         }
 
         // GET: GymClasses/Edit/5
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.GymClasses == null)
@@ -171,6 +173,7 @@ namespace GymBooking.Controllers
         }
 
         // GET: GymClasses/Delete/5
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.GymClasses == null)
